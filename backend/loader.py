@@ -3,36 +3,22 @@ import psycopg2
 import random
 from web3 import Web3
 
-
-w = Web3()            
+w = Web3()
 
 def cn():
     return psycopg2.connect(host="127.0.0.1", dbname="s_chain", user="postgres", password="India@#123", port="5432")
 
-def check(b, p):
-    try:
-        if float(p) < 500: return "Risky"
-    except: pass
-    return "Verified"
-
-def predict(p):
-    try:
-        v = float(p)
-        if v < 500: return "Rise"
-        if v > 10000: return "Stable"
-    except: pass
-    opts = ["Drop", "Rise", "Stable"]
-    return random.choice(opts)
+def check():
+    v = ["Verified", "Non-Verified"]
+    return random.choice(v)
 
 def run():
     c = cn()
     k = c.cursor()
-    print("Starting...")
-
-    logistics = ["BlueDart", "Delhivery", "Ecom Express", "Shadowfax", "FedEx"]
-    sellers = ["RetailNet", "Appario Retail", "SuperComNet", "VisionStar", "IndiFlash"]
-    cities = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Pune"]
-
+    l_list = ["BlueDart", "Delhivery", "Ecom Express", "Shadowfax", "FedEx"]
+    s_list = ["RetailNet", "Appario Retail", "SuperComNet", "VisionStar", "IndiFlash"]
+    c_list = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Pune"]
+    
     k.execute("DELETE FROM p")
     c.commit()
 
@@ -40,42 +26,38 @@ def run():
         r = csv.reader(f)
         next(r)
         
-        n_count = 0
+        batch = []
         for row in r:
             try:
-                pid = row[0]
-                n = row[3]
-                cat = row[4]
-                pr = row[6]
-                b = row[13]
+                # Prepare product data
+                pid, n, cat, pr, b = row[0], row[3], row[4], row[6], row[13]
                 if not b: b = "Generic"
+                s = check()
+                hd = random.choice(l_list)
+                sl = random.choice(s_list)
+                u = "User_" + str(random.randint(100, 999)) + " (" + random.choice(c_list) + ")"
+                
+                # Add to current batch
+                batch.append([pid, n, b, pr, cat, s, hd, sl, u])
 
-                s = check(b, pr)
-                fu = predict(pr)
-                
-                hd = random.choice(logistics)
-                sl = random.choice(sellers)
-                c_name = "User_" + str(random.randint(100, 999)) + " (" + random.choice(cities) + ")"
+                # Once we have 5 items, generate 1 hash and save
+                if len(batch) == 5:
+                    # Create 1 hash for the whole block string
+                    block_data = "".join([str(i) for item in batch for i in item])
+                    block_hash = w.keccak(text=block_data).hex()
 
-                txt = n + s + hd + sl + c_name
-                h = w.keccak(text=txt).hex()
-                
-                k.execute("""
-                    INSERT INTO p (pid, n, b, pr, cat, s, h, pred, hand, sell, cons) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, 
-                    (pid, n, b, pr, cat, s, h, fu, hd, sl, c_name))
-                
-                n_count += 1
-                if n_count % 100 == 0:
+                    for p_item in batch:
+                        k.execute("""
+                            INSERT INTO p (pid, n, b, pr, cat, s, h, hand, sell, cons) 
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (p_item[0], p_item[1], p_item[2], p_item[3], p_item[4], p_item[5], block_hash, p_item[6], p_item[7], p_item[8]))
+                    
+                    batch = [] # Reset for next block
                     c.commit()
-                    print(n_count)
-            except:
-                continue
-
-    c.commit()
+            except: continue
+            
     c.close()
-    print("Done")
+    print("Blocks Created Successfully")
 
 if __name__ == "__main__":
     run()
