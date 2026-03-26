@@ -2,6 +2,20 @@ from flask import Flask, render_template, request, redirect, session
 import psycopg2
 import pickle
 import os
+import json
+
+from web3 import Web3
+
+w = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
+w.eth.default_account = w.eth.accounts[0]
+
+with open('../blockchain/build/contracts/s.json') as f:
+    artifact = json.load(f)
+    abi = artifact['abi']
+
+addr = 0x42b784Fb086f7863b126294a3BefF0Dae723C38f 
+a = str(addr)
+contract = w.eth.contract(address=a, abi=abi)
 
 a = Flask(__name__)
 a.secret_key = "supply_chain_secret_key"
@@ -106,41 +120,68 @@ def predict_window():
 def add_product():
     if session.get('role') != 'admin':
         return redirect('/login')
-    
-    ai_suggestion = None
+
     if request.method == 'POST':
         n = request.form.get('n')
         b = request.form.get('b')
         pr = float(request.form.get('pr'))
         cat = request.form.get('cat')
-        
-        
+
         try:
             b_n = le_b.transform([b])[0]
             c_n = le_c.transform([cat])[0]
             p_val = model.predict([[b_n, c_n, pr]])
             s = "Verified" if p_val[0] == 1 else "Non-Verified"
         except:
-            s = "Non-Verified" 
+            s = "Non-Verified"
 
-        
-        from web3 import Web3
-        w = Web3()
         block_data = f"{n}{b}{pr}{cat}{s}"
         h = w.keccak(text=block_data).hex()
 
-        
-        c = cn()
-        k = c.cursor()
-        k.execute("""
-            INSERT INTO p (n, b, pr, cat, s, h, hand, sell, cons) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (n, b, pr, cat, s, h, "Main Hub", "Authorized Seller", "New Entry"))
-        c.commit()
-        c.close()
-        return redirect('/admin')
-        
+        try:
+            is_v = True if s == "Verified" else False
+            pid = int(os.urandom(2).hex(), 16)
+            
+            contract.functions.add(pid, n, is_v).transact()
+
+            c = cn()
+            k = c.cursor()
+            k.execute("""
+                INSERT INTO p (n, b, pr, cat, s, h, hand, sell, cons)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (n, b, pr, cat, s, h, "Main Hub", "Authorized Seller", "New Entry"))
+            c.commit()
+            c.close()
+            return redirect('/admin')
+        except Exception as e:
+            print(f"Blockchain Error: {e}")
+            return redirect('/admin')
+
     return render_template('add_product.html')
+
+@a.route('/v/<int:pid>')
+def v_p(pid):
+    try:
+        d = contract.functions.m(pid).call()
+        
+        if d[1] == "":
+            return render_template('v.html', msg="Not Found", d=None)
+            
+        res = {
+            "id": d[0],
+            "n": d[1],
+            "v": "Verified" if d[2] else "Non-Verified"
+        }
+        return render_template('v.html', msg=None, d=res)
+    except Exception as e:
+        return render_template('v.html', msg="Error", d=None)
+
+@a.route('/verify', methods=['GET', 'POST'])
+def verify_page():
+    if request.method == 'POST':
+        pid = request.form.get('pid')
+        return redirect(f'/v/{pid}')
+    return render_template('verify_input.html')
 
 @a.route('/logout')
 def logout():
