@@ -3,7 +3,6 @@ import psycopg2
 import pickle
 import os
 import json
-
 from web3 import Web3
 
 w = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
@@ -13,29 +12,33 @@ with open('../blockchain/build/contracts/s.json') as f:
     artifact = json.load(f)
     abi = artifact['abi']
 
-addr = 0x42b784Fb086f7863b126294a3BefF0Dae723C38f 
-a = str(addr)
-contract = w.eth.contract(address=a, abi=abi)
+raw = "0x42b784Fb086f7863b126294a3BefF0Dae723C38f"
+caddr = w.to_checksum_address(raw)
+contract = w.eth.contract(address=caddr, abi=abi)
 
 a = Flask(__name__)
-a.secret_key = "supply_chain_secret_key"
+a.secret_key = "supplychain"
 
 def cn():
     return psycopg2.connect(host="127.0.0.1", dbname="s_chain", user="postgres", password="India@#123", port="5432")
 
-def setup_db():
+def setup():
     c = cn()
     k = c.cursor()
     k.execute("CREATE TABLE IF NOT EXISTS users (uname TEXT UNIQUE, pwd TEXT)")
     c.commit()
     c.close()
 
-setup_db()
+setup()
 
 d = os.path.dirname(__file__)
 model = pickle.load(open(os.path.join(d, 'model.pkl'), 'rb'))
-le_b = pickle.load(open(os.path.join(d, 'le_b.pkl'), 'rb'))
-le_c = pickle.load(open(os.path.join(d, 'le_c.pkl'), 'rb'))
+leb = pickle.load(open(os.path.join(d, 'le_b.pkl'), 'rb'))
+lec = pickle.load(open(os.path.join(d, 'le_c.pkl'), 'rb'))
+
+@a.route('/')
+def home():
+    return render_template('index.html')
 
 @a.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -74,7 +77,7 @@ def login():
     return render_template('login.html', err=None)
 
 @a.route('/')
-def home():
+def landing_page():
     if 'role' not in session:
         return redirect('/login')
     p = request.args.get('p', 1, type=int)
@@ -82,9 +85,9 @@ def home():
     c = cn()
     k = c.cursor()
     k.execute("SELECT n, b, pr, s, hand, sell FROM p ORDER BY id DESC LIMIT 5 OFFSET %s", (off,))
-    d_data = k.fetchall()
+    ddata = k.fetchall()
     c.close()
-    return render_template('user.html', data=d_data, p=p)
+    return render_template('user.html', data=ddata, p=p)
 
 @a.route('/admin')
 def admin():
@@ -95,12 +98,12 @@ def admin():
     c = cn()
     k = c.cursor()
     k.execute("SELECT n, b, pr, s, hand, sell, cons, h FROM p ORDER BY id DESC LIMIT 5 OFFSET %s", (off,))
-    d_data = k.fetchall()
+    ddata = k.fetchall()
     c.close()
-    return render_template('admin.html', data=d_data, p=p)
+    return render_template('admin.html', data=ddata, p=p)
 
 @a.route('/predict', methods=['GET', 'POST'])
-def predict_window():
+def predict():
     if 'role' not in session:
         return redirect('/login')
     res = None
@@ -109,15 +112,16 @@ def predict_window():
             brand = request.form.get('brand')
             cat = request.form.get('cat')
             price = float(request.form.get('price'))
-            b_n = le_b.transform([brand])[0]
-            c_n = le_c.transform([cat])[0]
-            p_val = model.predict([[b_n, c_n, price]])
-            res = "Verified" if p_val[0] == 1 else "Non-Verified"
+            bn = leb.transform([brand])[0]
+            cn = lec.transform([cat])[0]
+            pval = model.predict([[bn, cn, price]])
+            res = "Verified" if pval[0] == 1 else "NonVerified"
         except:
             res = "Error"
     return render_template('predict.html', result=res)
+
 @a.route('/add_product', methods=['GET', 'POST'])
-def add_product():
+def addproduct():
     if session.get('role') != 'admin':
         return redirect('/login')
 
@@ -128,15 +132,15 @@ def add_product():
         cat = request.form.get('cat')
 
         try:
-            b_n = le_b.transform([b])[0]
-            c_n = le_c.transform([cat])[0]
-            p_val = model.predict([[b_n, c_n, pr]])
-            s = "Verified" if p_val[0] == 1 else "Non-Verified"
+            bn = leb.transform([b])[0]
+            cn = lec.transform([cat])[0]
+            pval = model.predict([[bn, cn, pr]])
+            s = "Verified" if pval[0] == 1 else "NonVerified"
         except:
-            s = "Non-Verified"
+            s = "NonVerified"
 
-        block_data = f"{n}{b}{pr}{cat}{s}"
-        h = w.keccak(text=block_data).hex()
+        bdata = f"{n}{b}{pr}{cat}{s}"
+        h = w.keccak(text=bdata).hex()
 
         try:
             is_v = True if s == "Verified" else False
@@ -147,14 +151,14 @@ def add_product():
             c = cn()
             k = c.cursor()
             k.execute("""
-                INSERT INTO p (n, b, pr, cat, s, h, hand, sell, cons)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (n, b, pr, cat, s, h, "Main Hub", "Authorized Seller", "New Entry"))
+                INSERT INTO p (pid, n, b, pr, cat, s, h, hand, sell, cons)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (pid, n, b, pr, cat, s, h, "Main Hub", "Authorized Seller", "New Entry"))
             c.commit()
             c.close()
             return redirect('/admin')
         except Exception as e:
-            print(f"Blockchain Error: {e}")
+            print(e)
             return redirect('/admin')
 
     return render_template('add_product.html')
@@ -162,10 +166,11 @@ def add_product():
 @a.route('/v/<int:pid>')
 def v_p(pid):
     try:
+        # Fetch from mapping 'm' in your smart contract
         d = contract.functions.m(pid).call()
         
         if d[1] == "":
-            return render_template('v.html', msg="Not Found", d=None)
+            return render_template('v.html', msg="ID Not Registered", d=None)
             
         res = {
             "id": d[0],
@@ -173,11 +178,11 @@ def v_p(pid):
             "v": "Verified" if d[2] else "Non-Verified"
         }
         return render_template('v.html', msg=None, d=res)
-    except Exception as e:
-        return render_template('v.html', msg="Error", d=None)
-
+    except:
+        return render_template('v.html', msg="System Error", d=None)
+    
 @a.route('/verify', methods=['GET', 'POST'])
-def verify_page():
+def verify():
     if request.method == 'POST':
         pid = request.form.get('pid')
         return redirect(f'/v/{pid}')
