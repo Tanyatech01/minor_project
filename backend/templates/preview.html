@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>BlockchainX | Secure Supply Chain</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="/static/style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+        <script
+            type="text/javascript"
+            src="https://s3.tradingview.com/tv.js"
+        ></script>
+        <script src="/static/script.js" defer></script>
+    </head>
+    <body>
+        <div id="main-bg" class="main-bg show"></div>
+
+        <nav>
+            <div class="nav-left">
+                <h2>BlockchainX</h2>
+                <div class="header-links">
+                    <a href="#" onclick="s('home')">Home</a>
+                    <a href="#" onclick="s('about')">About</a>
+                    <a href="#" onclick="s('tech')">Tech Stack</a>
+                    <a href="#" onclick="s('team')">Team</a>
+                </div>
+            </div>
+            <div class="navbtn">
+                <button class="beveled-btn" onclick="o('um')">
+                    User Login
+                </button>
+                <button class="beveled-btn" onclick="o('am')">
+                    Admin Login
+                </button>
+            </div>
+        </nav>
+
+        <div id="news-ticker" class="ticker-wrap">
+            <div class="ticker">
+                <div class="ticker-item">SEC Approves Spot Ethereum ETFs</div>
+                <div class="ticker-item">
+                    Blockchain Adoption in Logistics Grows by 45% in 2026
+                </div>
+                <div class="ticker-item">
+                    Major Retailer Integrates Zero-Knowledge Proofs for Supply
+                    Chain Verification
+                </div>
+                <div class="ticker-item">
+                    New Cryptographic Standards Released for IoT Devices
+                </div>
+                <div class="ticker-item">
+                    Bitcoin Halving Impact Stabilizes Market
+                </div>
+                <div class="ticker-item">
+                    Global Supply Chain Consortium Adopts Smart Contracts
+                </div>
+                <div class="ticker-item">
+                    AI-Driven Anomaly Detection Reduces Freight Fraud by 60%
+                </div>
+            </div>
+            <div class="ticker" aria-hidden="true">
+                <div class="ticker-item">SEC Approves Spot Ethereum ETFs</div>
+                <div class="ticker-item">
+                    Blockchain Adoption in Logistics Grows by 45% in 2026
+                </div>
+                <div class="ticker-item">
+                    Major Retailer Integrates Zero-Knowledge Proofs for Supply
+                    Chain Verification
+                </div>
+                <div class="ticker-item">
+                    New Cryptographic Standards Released for IoT Devices
+                </div>
+                <div class="ticker-item">
+                    Bitcoin Halving Impact Stabilizes Market
+                </div>
+                <div class="ticker-item">
+                    Global Supply Chain Consortium Adopts Smart Contracts
+                </div>
+                <div class="ticker-item">
+                    AI-Driven Anomaly Detection Reduces Freight Fraud by 60%
+                </div>
+            </div>
+        </div>
+
+        {% if err %}
+        <div class="alert-box err-box">
+            <i class="fas fa-exclamation-triangle"></i> {{ err }}
+        </div>
+        {% endif %} {% if msg %}
+        <div class="alert-box msg-box">
+            <i class="fas fa-check-circle"></i> {{ msg }}
+        </div>
+        {% endif %}
+
+        <div id="home" class="content active">
+            <div class="hero-quote">
+                <h1 class="gradient-text">Trust Through Transparency.</h1>
+                <p class="subtitle">
+                    Securing the future of supply chains with immutable
+                    architecture.
+                </p>
+            </div>
+
+            <div class="tile-container">
+                <div class="scroll-tile">
+                    <i class="fas fa-link"></i>
+                    <h3>Immutable Ledger</h3>
+                    <p>
+                        Every transaction is cryptographically secured and
+                        permanently recorded, preventing unauthorized
+                        alteration.
+                    </p>
+                </div>
+                <div class="scroll-tile">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Verification</h3>
+                    <p>
+                        Machine learning algorithms detect anomalies in
+                        real-time to intercept compromised shipments instantly.
+                    </p>
+                </div>
+                <div class="scroll-tile">
+                    <i class="fas fa-globe"></i>
+                    <h3>Decentralized</h3>
+                    <p>
+                        Removing single points of failure across the global
+                        network to guarantee continuous operational uptime.
+                    </p>
+                </div>
+            </div>
+
+            <div class="market-section" style="margin-top: 80px">
+                <h2
+                    class="gradient-text text-center"
+                    style="margin-bottom: 30px"
+                >
+                    Global Market Overview
+                </h2>
+
+                <div
+                    class="d-flex justify-content-center"
+                    style="gap: 15px; margin-bottom: 20px"
+                >
+                    <button
+                        class="beveled-btn"
+                        onclick="loadChart(event, 'BINANCE:BTCUSD', 'Bitcoin')"
+                    >
+                        BTC/USD
+                    </button>
+                    <button
+                        class="beveled-btn outline-btn"
+                        onclick="loadChart(event, 'BINANCE:ETHUSD', 'Ethereum')"
+                    >
+                        ETH/USD
+                    </button>
+                    <button
+                        class="beveled-btn outline-btn"
+                        onclick="
+                            loadChart(
+                                event,
+                                'NYSE:IBM',
+                                'IBM (Blockchain Leader)',
+                            )
+                        "
+                    >
+                        IBM
+                    </button>
+                    <button
+                        class="beveled-btn outline-btn"
+                        onclick="loadChart(event, 'NASDAQ:MSFT', 'Microsoft')"
+                    >
+                        Microsoft
+                    </button>
+                </div>
+
+                <div
+                    style="
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        margin-bottom: 30px;
+                        max-width: 600px;
+                        margin-left: auto;
+                        margin-right: auto;
+                    "
+                >
+                    <input
+                        type="text"
+                        id="tvSearch"
+                        placeholder="Search Market Symbol (e.g., NASDAQ:COIN, BINANCE:SOLUSD)"
+                        style="margin: 0; flex-grow: 1"
+                    />
+                    <button
+                        class="beveled-btn"
+                        onclick="searchCustomChart()"
+                        style="margin: 0; white-space: nowrap"
+                    >
+                        Search Symbol
+                    </button>
+                </div>
+
+                <div
+                    class="market-container"
+                    style="
+                        display: flex;
+                        gap: 20px;
+                        height: 500px;
+                        background: #0a0a0a;
+                        border: 1px solid #1a1a1a;
+                        border-radius: 20px;
+                        padding: 20px;
+                    "
+                >
+                    <div
+                        id="tv_chart_container"
+                        style="
+                            flex: 2;
+                            height: 100%;
+                            border-radius: 10px;
+                            overflow: hidden;
+                        "
+                    ></div>
+
+                    <div
+                        style="
+                            flex: 1;
+                            background: #111;
+                            border-radius: 10px;
+                            padding: 25px;
+                            border: 1px solid #222;
+                        "
+                    >
+                        <h3
+                            style="
+                                color: #00f2fe;
+                                margin-top: 0;
+                                border-bottom: 1px solid #222;
+                                padding-bottom: 15px;
+                            "
+                            id="asset-title"
+                        >
+                            Bitcoin (BTC)
+                        </h3>
+
+                        <div class="stat-row" style="margin-top: 20px">
+                            <span style="color: #64748b; font-size: 0.9rem"
+                                >Market Cap:</span
+                            >
+                            <strong
+                                id="stat-mcap"
+                                style="
+                                    color: #e2e8f0;
+                                    font-family: monospace;
+                                    font-size: 1.1rem;
+                                    float: right;
+                                "
+                                >$1.2T</strong
+                            >
+                        </div>
+
+                        <div class="stat-row" style="margin-top: 15px">
+                            <span style="color: #64748b; font-size: 0.9rem"
+                                >24h Volume:</span
+                            >
+                            <strong
+                                id="stat-vol"
+                                style="
+                                    color: #e2e8f0;
+                                    font-family: monospace;
+                                    font-size: 1.1rem;
+                                    float: right;
+                                "
+                                >$45.8B</strong
+                            >
+                        </div>
+
+                        <div class="stat-row" style="margin-top: 15px">
+                            <span style="color: #64748b; font-size: 0.9rem"
+                                >Network Utilization:</span
+                            >
+                            <strong
+                                id="stat-util"
+                                style="
+                                    color: #4ade80;
+                                    font-size: 1.1rem;
+                                    float: right;
+                                "
+                                >High</strong
+                            >
+                        </div>
+
+                        <p
+                            style="
+                                color: #94a3b8;
+                                font-size: 0.85rem;
+                                line-height: 1.6;
+                                margin-top: 40px;
+                                border-top: 1px solid #222;
+                                padding-top: 20px;
+                            "
+                        >
+                            * Live integration capabilities active. Real-time
+                            market tracking enabled for supply chain analytics
+                            and financial auditing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="about" class="content">
+            <div class="hero-quote">
+                <h1 class="gradient-text">Why We Need This</h1>
+            </div>
+
+            <div class="tile-container">
+                <div class="scroll-tile about-tile">
+                    <h3>The Problem</h3>
+                    <p>
+                        Traditional supply chains suffer from opacity, fraud,
+                        and immense inefficiencies. Counterfeit goods and lost
+                        shipments cost the global economy billions annually,
+                        while centralized databases remain highly vulnerable to
+                        tampering.
+                    </p>
+                </div>
+                <div class="scroll-tile about-tile">
+                    <h3>The Architecture</h3>
+                    <p>
+                        By merging Distributed Ledger Technology with predictive
+                        AI, we create a zero-trust environment. Data integrity
+                        is mathematically guaranteed, and handler status is
+                        dynamically updated without reliance on third-party
+                        intermediaries.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="video-container"
+                style="margin-top: 80px; text-align: center"
+            >
+                <h2 class="gradient-text" style="margin-bottom: 30px">
+                    Understanding the Technology
+                </h2>
+                <div
+                    style="
+                        background: #0a0a0a;
+                        border: 1px solid #1a1a1a;
+                        padding: 20px;
+                        border-radius: 20px;
+                        display: inline-block;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                    "
+                >
+                    <iframe
+                        width="800"
+                        height="450"
+                        src="https://www.youtube.com/embed/SSo_EIwHSd4"
+                        title="Blockchain Technology Explained"
+                        frameborder="0"
+                        allow="
+                            accelerometer;
+                            autoplay;
+                            clipboard-write;
+                            encrypted-media;
+                            gyroscope;
+                            picture-in-picture;
+                        "
+                        allowfullscreen
+                        style="border-radius: 10px"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div id="tech" class="content">
+            <div class="hero-quote">
+                <h1 class="gradient-text">System Architecture</h1>
+                <p class="subtitle">
+                    Complete technical specification of the BlockchainX
+                    infrastructure.
+                </p>
+            </div>
+
+            <div style="max-width: 1000px; margin: 0 auto">
+                <table class="tech-table">
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Technology Used</th>
+                            <th>Implementation Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-desktop"></i> Frontend
+                            </td>
+                            <td>HTML5, CSS3, JavaScript, GSAP</td>
+                            <td>
+                                Responsive UI with ScrollTrigger animations,
+                                dynamic DOM manipulation via Jinja2 templating.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-server"></i> Backend Layer
+                            </td>
+                            <td>Python, Flask (WSGI)</td>
+                            <td>
+                                RESTful routing architecture, session
+                                management, secure HTTP handling.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-link"></i> Blockchain Core
+                            </td>
+                            <td>Ethereum, Web3.py, Ganache</td>
+                            <td>
+                                Local EVM deployment, Smart Contract ABI
+                                integration, SHA-256 block hashing via contract
+                                address.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-database"></i> Database
+                            </td>
+                            <td>PostgreSQL, Psycopg2</td>
+                            <td>
+                                Relational schema design, transactional commits,
+                                parameterized SQL.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-brain"></i> AI / ML Logic
+                            </td>
+                            <td>Scikit-Learn, Random Forest</td>
+                            <td>
+                                Supervised learning model evaluating price and
+                                brand credibility. Label Encoders handle
+                                categorical data.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-shield-halved"></i>
+                                Authentication
+                            </td>
+                            <td>Flask-Session, Custom RBAC</td>
+                            <td>
+                                Role-Based Access Control enforcing privilege
+                                separation. In-memory terminal OTP generation.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="category-col">
+                                <i class="fas fa-plug"></i> APIs & Data
+                            </td>
+                            <td>Python csv module, TradingView API</td>
+                            <td>
+                                Automated dataset ingestion from Flipkart
+                                formatted CSV. Real-time market charting.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="team" class="content">
+            <h1 class="gradient-text text-center" style="margin-bottom: 50px">
+                Project Core Team
+            </h1>
+            <div class="cards">
+                <a
+                    href="https://github.com/Suh-2223"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="card"
+                >
+                    <h3>Suhani</h3>
+                    <p>System Architect & Dev</p>
+                    <p class="work-distribution">
+                        Work: GSAP animations, JS logic, HTML/CSS structure
+                    </p>
+                    <i class="fab fa-github card-icon"></i>
+                </a>
+                <a
+                    href="https://github.com/trr05sneha320-ux"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="card"
+                >
+                    <h3>Sneha</h3>
+                    <p>Database Manager</p>
+                    <p class="work-distribution">
+                        Work: PostgreSQL schema design, CSV parsing logic
+                    </p>
+                    <i class="fab fa-github card-icon"></i>
+                </a>
+                <a
+                    href="https://github.com/sukritisingh11"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="card"
+                >
+                    <h3>Sukriti</h3>
+                    <p>UI/UX Lead</p>
+                    <p class="work-distribution">
+                        Work: Font selection, color palette, button styling,
+                        card layout
+                    </p>
+                    <i class="fab fa-github card-icon"></i>
+                </a>
+                <a
+                    href="https://github.com/Tanyatech01"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="card"
+                >
+                    <h3>Tanya</h3>
+                    <p>Backend Core</p>
+                    <p class="work-distribution">
+                        Work: Flask routing, authentication, blockchain/ML
+                        integration
+                    </p>
+                    <i class="fab fa-github card-icon"></i>
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p>
+                © 2026 BlockchainX | Secure Node Protocol | Blockchain and ai
+                for supply chain transparency
+            </p>
+        </footer>
+
+        <div id="um" class="modal">
+            <div class="modalbox">
+                <h2>User Authentication</h2>
+                <form action="/login" method="POST">
+                    <input
+                        type="text"
+                        name="u"
+                        placeholder="Username"
+                        required
+                    />
+                    <input
+                        type="password"
+                        name="p"
+                        placeholder="Password"
+                        required
+                    />
+                    <button type="submit" class="beveled-btn w-100 mt-3">
+                        Connect
+                    </button>
+                    <button
+                        type="button"
+                        class="beveled-btn outline-btn w-100 mt-2"
+                        onclick="c('um')"
+                    >
+                        Exit
+                    </button>
+                </form>
+                <p class="mt-4">
+                    <a
+                        href="#"
+                        onclick="
+                            c('um');
+                            o('sm');
+                        "
+                        class="accent-link"
+                        >New User? Signup</a
+                    >
+                </p>
+            </div>
+        </div>
+
+        <div id="sm" class="modal">
+            <div class="modalbox">
+                <h2>User Registration</h2>
+                <form action="/signup" method="POST">
+                    <input
+                        type="text"
+                        name="u"
+                        placeholder="Username"
+                        required
+                    />
+                    <input
+                        type="email"
+                        name="e"
+                        placeholder="Email Address"
+                        required
+                    />
+                    <input
+                        type="password"
+                        name="p"
+                        placeholder="Password"
+                        required
+                    />
+                    <button type="submit" class="beveled-btn w-100 mt-3">
+                        Submit Request
+                    </button>
+                    <button
+                        type="button"
+                        class="beveled-btn outline-btn w-100 mt-2"
+                        onclick="c('sm')"
+                    >
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="am" class="modal">
+            <div class="modalbox">
+                <h2>Admin Authentication</h2>
+                <form action="/login" method="POST">
+                    <input
+                        type="text"
+                        name="u"
+                        placeholder="Admin ID"
+                        required
+                    />
+                    <input
+                        type="password"
+                        name="p"
+                        placeholder="Passcode"
+                        required
+                    />
+                    <button type="submit" class="beveled-btn w-100 mt-3">
+                        Authorize
+                    </button>
+                    <button
+                        type="button"
+                        class="beveled-btn outline-btn w-100 mt-2"
+                        onclick="c('am')"
+                    >
+                        Exit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

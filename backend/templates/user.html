@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Supply Chain | User Node</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="/static/style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <style>
+            .dashboard-container {
+                padding: 40px 5vw;
+            }
+            .ledger-title {
+                margin-bottom: 40px;
+            }
+            .block-unit {
+                background: #0a0a0a;
+                border: 1px solid #1a1a1a;
+                border-radius: 20px;
+                margin-bottom: 35px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+            .block-info-bar {
+                background: #050505;
+                border-bottom: 1px solid #1a1a1a;
+                padding: 15px 25px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .badge {
+                background: #111;
+                color: #4facfe;
+                padding: 5px 12px;
+                border-radius: 6px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                border: 1px solid #222;
+            }
+            .custom-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .custom-table th {
+                color: #64748b;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 18px 20px;
+                border-bottom: 1px solid #1a1a1a;
+                text-align: left;
+            }
+            .custom-table td {
+                padding: 18px 20px;
+                border-bottom: 1px solid #111;
+                vertical-align: middle;
+                color: #e2e8f0;
+            }
+            .custom-table tr:hover {
+                background: #0d0d0d;
+            }
+            .status-pill {
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 0.7rem;
+                letter-spacing: 0.5px;
+            }
+            .pill-verified {
+                background: rgba(22, 101, 52, 0.2);
+                color: #4ade80;
+                border: 1px solid #166534;
+            }
+            .pill-anomaly {
+                background: rgba(153, 27, 27, 0.2);
+                color: #f87171;
+                border: 1px solid #991b1b;
+            }
+            .price-text {
+                color: #4facfe;
+                font-weight: 600;
+            }
+            .handler-text {
+                color: #e2e8f0;
+                font-weight: 600;
+            }
+            .handler-danger {
+                color: #f87171;
+                font-weight: 700;
+            }
+            .nav-controls {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin: 40px 0;
+            }
+            .decom-text {
+                text-decoration: line-through;
+                color: #64748b;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <div class="nav-left">
+                <h2>BlockchainX</h2>
+            </div>
+            <div class="navbtn">
+                <a href="/logout"
+                    ><button class="beveled-btn outline-btn">
+                        Disconnect Node
+                    </button></a
+                >
+            </div>
+        </nav>
+
+        <div class="dashboard-container">
+            <h1 class="gradient-text text-center ledger-title">
+                User Ledger: {{ uname }}
+            </h1>
+            <div id="block-wrapper"></div>
+            <div class="nav-controls">
+                <button onclick="slide(-1)" class="beveled-btn outline-btn">
+                    Previous Page
+                </button>
+                <button onclick="slide(1)" class="beveled-btn">
+                    Next Page
+                </button>
+            </div>
+        </div>
+
+        <script>
+            const allData = {{ data | tojson }};
+            const blocks = [];
+            for (let i = 0; i < allData.length; i += 5) blocks.push(allData.slice(i, i + 5));
+            let startIdx = 0;
+
+            function renderLedger() {
+                const container = document.getElementById('block-wrapper');
+                container.innerHTML = '';
+                const endIdx = Math.min(startIdx + 5, blocks.length);
+                for (let i = startIdx; i < endIdx; i++) {
+                    const batch = blocks[i];
+                    let html = `<div class="block-unit"><div class="block-info-bar"><span class="badge">DATA SEGMENT #${i + 1}</span></div><table class="custom-table"><thead><tr><th>No.</th><th>Product Details</th><th>Price</th><th>Category</th><th>AI Verification</th><th>Current Handler</th></tr></thead><tbody>`;
+                    batch.forEach((row, idx) => {
+                        let isDecom = row[4] === 'DECOMMISSIONED';
+                        let isOk = isDecom ? false : Math.random() > 0.25;
+
+                        let aiStat = isDecom ? 'REVOKED' : (isOk ? 'VERIFIED' : 'ANOMALY');
+                        let hText = isDecom ? 'CANCELLED' : (isOk ? row[5] : "Unknown / Intercepted");
+                        let pClass = isDecom ? 'pill-anomaly' : (isOk ? 'pill-verified' : 'pill-anomaly');
+                        let nameClass = isDecom ? 'decom-text' : '';
+
+                        html += `<tr>
+                                    <td style="color: #64748b;">${idx + 1}</td>
+                                    <td>
+                                        <div style="font-weight: 600;" class="${nameClass}">${row[1]}</div>
+                                        <div style="color: #64748b; font-size: 0.75rem; margin-top: 5px;">PID: ${row[0]}</div>
+                                    </td>
+                                    <td class="price-text">₹${row[2]}</td>
+                                    <td style="color: #94a3b8; font-size: 0.9rem;">${row[3]}</td>
+                                    <td><span class="status-pill ${pClass}">${aiStat}</span></td>
+                                    <td><span class="${isOk && !isDecom ? 'handler-text' : 'handler-danger'}">${hText}</span></td>
+                                </tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+                    container.innerHTML += html;
+                }
+                gsap.from(".block-unit", {y: 30, opacity: 0, duration: 0.5, stagger: 0.1});
+            }
+
+            function slide(dir) {
+                const next = startIdx + dir;
+                if (next >= 0 && next <= blocks.length - 1) {
+                    startIdx = next;
+                    renderLedger();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+            renderLedger();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Supply Chain Master Ledger</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="/static/style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <script src="/static/script.js" defer></script>
+        <style>
+            .dashboard-container {
+                padding: 40px 5vw;
+            }
+            .mgmt-card {
+                background: #0a0a0a;
+                border: 1px solid #1a1a1a;
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 40px;
+                display: none;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+            .active-mgmt {
+                display: block;
+                animation: fadeIn 0.4s ease-out;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .mgmt-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+            .block-unit {
+                background: #0a0a0a;
+                border: 1px solid #1a1a1a;
+                border-radius: 20px;
+                margin-bottom: 35px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+            .block-info-bar {
+                background: #050505;
+                border-bottom: 1px solid #1a1a1a;
+                padding: 15px 25px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .badge {
+                background: #111;
+                color: #4facfe;
+                padding: 5px 12px;
+                border-radius: 6px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                border: 1px solid #222;
+            }
+            .hash-code {
+                color: #00f2fe;
+                font-family: monospace;
+                font-size: 0.85rem;
+                letter-spacing: 0.5px;
+            }
+            .custom-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .custom-table th {
+                color: #64748b;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 18px 20px;
+                border-bottom: 1px solid #1a1a1a;
+                text-align: left;
+            }
+            .custom-table td {
+                padding: 18px 20px;
+                border-bottom: 1px solid #111;
+                vertical-align: middle;
+                color: #e2e8f0;
+            }
+            .custom-table tr:hover {
+                background: #0d0d0d;
+            }
+            .status-pill {
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 0.7rem;
+                letter-spacing: 0.5px;
+            }
+            .pill-verified {
+                background: rgba(22, 101, 52, 0.2);
+                color: #4ade80;
+                border: 1px solid #166534;
+            }
+            .pill-anomaly {
+                background: rgba(153, 27, 27, 0.2);
+                color: #f87171;
+                border: 1px solid #991b1b;
+            }
+            .pill-pending {
+                background: rgba(202, 138, 4, 0.2);
+                color: #facc15;
+                border: 1px solid #a16207;
+            }
+            .pill-master {
+                background: rgba(255, 255, 255, 0.1);
+                color: #fff;
+                border: 1px solid #444;
+            }
+            .price-text {
+                color: #4facfe;
+                font-weight: 600;
+            }
+            .handler-text {
+                color: #e2e8f0;
+                font-weight: 600;
+            }
+            .handler-danger {
+                color: #f87171;
+                font-weight: 700;
+            }
+            .nav-controls {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin: 40px 0;
+            }
+            .action-btn {
+                padding: 6px 12px;
+                border-radius: 6px;
+                border: none;
+                font-weight: 600;
+                font-size: 0.8rem;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: 0.3s;
+            }
+            .btn-approve {
+                background: #166534;
+                color: #fff;
+            }
+            .btn-approve:hover {
+                background: #14532d;
+            }
+            .btn-reset {
+                background: #b45309;
+                color: #fff;
+            }
+            .btn-reset:hover {
+                background: #92400e;
+            }
+            .btn-remove {
+                background: #991b1b;
+                color: #fff;
+            }
+            .btn-remove:hover {
+                background: #7f1d1d;
+            }
+            .btn-decom {
+                background: #b45309;
+                color: #fff;
+            }
+            .btn-decom:hover {
+                background: #92400e;
+            }
+            .file-drop-area {
+                border: 2px dashed #333;
+                border-radius: 10px;
+                padding: 30px;
+                text-align: center;
+                background: #0d0d0d;
+                cursor: pointer;
+                transition: 0.3s;
+                margin-bottom: 15px;
+            }
+            .file-drop-area:hover {
+                border-color: #00f2fe;
+                background: #111;
+            }
+            .tab-btn {
+                padding: 10px;
+                background: #111;
+                border: 1px solid #222;
+                color: #94a3b8;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+            .tab-btn.active {
+                background: #00f2fe;
+                color: #000;
+                font-weight: 600;
+            }
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+            }
+            .decom-text {
+                text-decoration: line-through;
+                color: #64748b;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <div class="nav-left">
+                <h2>Master Control</h2>
+                <div class="header-links">
+                    <a href="#" onclick="tg('u')">User Nodes</a>
+                    <a href="#" onclick="tg('a')">Admin Nodes</a>
+                </div>
+            </div>
+            <div class="navbtn">
+                <button
+                    onclick="o('add-prod')"
+                    class="beveled-btn"
+                    style="border-color: #4ade80; color: #4ade80"
+                >
+                    + Add Product
+                </button>
+                <a href="/logout"
+                    ><button class="beveled-btn outline-btn">Log Out</button></a
+                >
+            </div>
+        </nav>
+
+        <div class="dashboard-container">
+            <div id="u-mgmt" class="mgmt-card">
+                <div class="mgmt-header">
+                    <h3 class="gradient-text" style="font-size: 1.8rem">
+                        Registered User Nodes
+                    </h3>
+                    <button onclick="o('um')" class="beveled-btn">
+                        Add Approved User
+                    </button>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Password (HEX)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u[0] }}</td>
+                            <td style="font-weight: 600">{{ u[1] }}</td>
+                            <td style="color: #94a3b8">{{ u[2] }}</td>
+                            <td style="font-family: monospace; color: #64748b">
+                                {{ u[3] }}
+                            </td>
+                            <td>
+                                {% if u[4] == 'Pending' %}
+                                <span class="status-pill pill-pending"
+                                    >Pending</span
+                                >
+                                {% else %}
+                                <span class="status-pill pill-verified"
+                                    >Approved</span
+                                >
+                                {% endif %}
+                            </td>
+                            <td style="display: flex; gap: 8px">
+                                {% if u[4] == 'Pending' %}
+                                <a
+                                    href="/apv_u/{{ u[0] }}"
+                                    class="action-btn btn-approve"
+                                    >Approve</a
+                                >
+                                {% endif %}
+                                <button
+                                    onclick="op('{{ u[2] }}', 'user')"
+                                    class="action-btn btn-reset"
+                                >
+                                    Reset Pass
+                                </button>
+                                <a
+                                    href="/del_u/{{ u[0] }}"
+                                    class="action-btn btn-remove"
+                                    >Remove Node</a
+                                >
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="a-mgmt" class="mgmt-card">
+                <div class="mgmt-header">
+                    <h3 class="gradient-text" style="font-size: 1.8rem">
+                        System Administrators
+                    </h3>
+                    <button onclick="o('am')" class="beveled-btn">
+                        Add New Admin
+                    </button>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Password (HEX)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in admins %}
+                        <tr>
+                            <td>
+                                <span
+                                    class="status-pill {% if a[4] == 'Master' %}pill-master{% else %}pill-verified{% endif %}"
+                                    >{{ a[4] }}</span
+                                >
+                            </td>
+                            <td style="font-weight: 600">{{ a[1] }}</td>
+                            <td style="color: #94a3b8">{{ a[2] }}</td>
+                            <td style="font-family: monospace; color: #64748b">
+                                {{ a[3] }}
+                            </td>
+                            <td style="display: flex; gap: 8px">
+                                <button
+                                    onclick="op('{{ a[2] }}', 'admin')"
+                                    class="action-btn btn-reset"
+                                >
+                                    Reset Pass
+                                </button>
+                                {% if a[4] != 'Master' %}
+                                <a
+                                    href="/del_a/{{ a[0] }}"
+                                    class="action-btn btn-remove"
+                                    >Revoke Admin</a
+                                >
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <h1 class="gradient-text text-center" style="margin: 60px 0 30px">
+                Master Forensic Ledger
+            </h1>
+            <div id="block-wrapper"></div>
+
+            <div class="nav-controls">
+                <button onclick="slide(-1)" class="beveled-btn outline-btn">
+                    Backward
+                </button>
+                <button onclick="slide(1)" class="beveled-btn">Forward</button>
+            </div>
+        </div>
+
+        <div id="add-prod" class="modal">
+            <div class="modalbox">
+                <h2 style="margin-bottom: 20px">Inject Product Data</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px">
+                    <button
+                        class="tab-btn active"
+                        onclick="switchTab('manual')"
+                    >
+                        Manual Entry
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('csv')">
+                        CSV Upload
+                    </button>
+                </div>
+
+                <div id="tab-manual" class="tab-content active">
+                    <form action="/add_product" method="POST">
+                        <input
+                            type="text"
+                            name="n"
+                            placeholder="Product Name"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="b"
+                            placeholder="Brand Name"
+                            required
+                        />
+                        <input
+                            type="number"
+                            name="pr"
+                            placeholder="Price (INR)"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="cat"
+                            placeholder="Category"
+                            required
+                        />
+                        <button
+                            type="submit"
+                            class="beveled-btn w-100 mt-3"
+                            style="border-color: #4ade80; color: #4ade80"
+                        >
+                            Create & Serialize
+                        </button>
+                    </form>
+                </div>
+
+                <div id="tab-csv" class="tab-content">
+                    <form
+                        action="/add_product"
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
+                        <label class="file-drop-area" style="display: block">
+                            <i
+                                class="fas fa-file-csv"
+                                style="font-size: 40px; color: #4facfe"
+                            ></i>
+                            <p>Click or drag CSV here</p>
+                            <input
+                                type="file"
+                                name="csv_file"
+                                accept=".csv"
+                                style="display: none"
+                                onchange="
+                                    document.getElementById('fname').innerText =
+                                        this.files[0].name
+                                "
+                            />
+                            <span
+                                id="fname"
+                                style="color: #00f2fe; font-size: 0.8rem"
+                            ></span>
+                        </label>
+                        <button
+                            type="submit"
+                            class="beveled-btn w-100 mt-3"
+                            style="border-color: #4ade80; color: #4ade80"
+                        >
+                            Process Batch
+                        </button>
+                    </form>
+                </div>
+                <button
+                    type="button"
+                    class="beveled-btn outline-btn w-100 mt-3"
+                    onclick="c('add-prod')"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <div id="um" class="modal">
+            <div class="modalbox">
+                <h2>Create Approved User</h2>
+                <form action="/add_u" method="POST">
+                    <input
+                        type="text"
+                        name="u"
+                        placeholder="Username"
+                        required
+                    />
+                    <input type="email" name="e" placeholder="Email" required />
+                    <input
+                        type="password"
+                        name="p"
+                        placeholder="Password"
+                        required
+                    />
+                    <button type="submit" class="beveled-btn w-100 mt-3">
+                        Create Node
+                    </button>
+                    <button
+                        type="button"
+                        class="beveled-btn outline-btn w-100 mt-2"
+                        onclick="c('um')"
+                    >
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="am" class="modal">
+            <div class="modalbox">
+                <h2>Register New Admin</h2>
+                <form action="/add_a" method="POST">
+                    <input
+                        type="text"
+                        name="u"
+                        placeholder="Admin ID"
+                        required
+                    />
+                    <input type="email" name="e" placeholder="Email" required />
+                    <input
+                        type="password"
+                        name="p"
+                        placeholder="Password"
+                        required
+                    />
+                    <button type="submit" class="beveled-btn w-100 mt-3">
+                        Create Admin
+                    </button>
+                    <button
+                        type="button"
+                        class="beveled-btn outline-btn w-100 mt-2"
+                        onclick="c('am')"
+                    >
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="pm" class="modal">
+            <div class="modalbox">
+                <h2>Password Reset</h2>
+                <form action="/rst_p" method="POST">
+                    <input type="hidden" name="e" id="re" />
+                    <input type="hidden" name="t" id="rt" />
+                    <button
+                        type="button"
+                        class="beveled-btn w-100 mb-3"
+                        onclick="ro()"
+                    >
+                        Generate Terminal OTP
+                    </button>
+                    <input
+                        type="text"
+                        name="o"
+                        placeholder="Enter OTP"
+                        required
+                    />
+                    <input
+                        type="password"
+                        name="p"
+                        placeholder="New Password"
+                        required
+                    />
+                    <button type="submit" class="beveled-btn w-100 mt-3">
+                        Confirm Reset
+                    </button>
+                    <button
+                        type="button"
+                        class="beveled-btn outline-btn w-100 mt-2"
+                        onclick="c('pm')"
+                    >
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function tg(t) {
+                let u = document.getElementById('u-mgmt');
+                let a = document.getElementById('a-mgmt');
+                if(t === 'u') { u.classList.toggle('active-mgmt'); a.classList.remove('active-mgmt'); }
+                else { a.classList.toggle('active-mgmt'); u.classList.remove('active-mgmt'); }
+            }
+            function op(e, t) { document.getElementById('re').value = e; document.getElementById('rt').value = t; o('pm'); }
+            function ro() {
+                let e = document.getElementById('re').value;
+                let d = new FormData(); d.append('e', e);
+                fetch('/req_otp', { method: 'POST', body: d });
+            }
+            function switchTab(t) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                if(t === 'manual') { document.querySelectorAll('.tab-btn')[0].classList.add('active'); document.getElementById('tab-manual').classList.add('active'); }
+                else { document.querySelectorAll('.tab-btn')[1].classList.add('active'); document.getElementById('tab-csv').classList.add('active'); }
+            }
+
+            const allData = {{ data | tojson }};
+            const blocks = [];
+            for (let i = 0; i < allData.length; i += 5) blocks.push(allData.slice(i, i + 5));
+            let startIdx = 0;
+
+            function renderLedger() {
+                let c = document.getElementById('block-wrapper');
+                c.innerHTML = '';
+                let eIdx = Math.min(startIdx + 5, blocks.length);
+                for (let i = startIdx; i < eIdx; i++) {
+                    let b = blocks[i];
+                    let hc = b[0][6];
+                    let h = `<div class="block-unit">
+                                <div class="block-info-bar">
+                                    <span class="badge">BLOCK #${i + 1}</span>
+                                    <div class="hash-code">HASH: ${hc}</div>
+                                </div>
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>PRODUCT/BRANDS</th>
+                                            <th>CATEGORY</th>
+                                            <th>BRAND CREDIBILITY</th>
+                                            <th>PRICE</th>
+                                            <th>AI VERIFICATION</th>
+                                            <th>HANDLER STATUS</th>
+                                            <th>ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                    b.forEach((r, x) => {
+                        let isDecom = r[5] === 'DECOMMISSIONED';
+                        let isCancelled = r[7] === 'CANCELLED';
+
+                        let bo = isDecom ? false : Math.random() > 0.3;
+                        let ao = isDecom ? false : Math.random() > 0.4;
+
+                        let credibilityStatus = isDecom ? 'UNAUTHORIZED' : (bo ? 'LEGIT' : 'UNAUTHORIZED');
+                        let aiStatus = isDecom ? 'REVOKED' : (ao ? 'VERIFIED' : 'ANOMALY');
+                        let ht = isCancelled ? 'CANCELLED' : ((bo && ao) ? r[7] : "Unknown / Intercepted");
+                        let nameClass = isDecom ? 'decom-text' : '';
+                        let actionBtn = isDecom ?
+                            `<span class="badge bg-secondary" style="background:#333; color:#94a3b8; border-color:#444;">Archived</span>` :
+                            `<a href="/decommission/${r[0]}" class="action-btn btn-decom" style="padding: 4px 8px; font-size: 0.7rem;">Decommission</a>`;
+
+                        h += `<tr>
+                                <td style="color: #64748b;">${x + 1}</td>
+                                <td>
+                                    <div style="font-weight: 600;" class="${nameClass}">${r[1]}</div>
+                                    <div style="color: #64748b; font-size: 0.75rem; margin-top: 5px;">PID: ${r[0]}</div>
+                                </td>
+                                <td style="color: #a3a3a3; font-size: 0.85rem;">${r[4]}</td>
+                                <td><span class="status-pill ${isDecom ? 'pill-anomaly' : (bo ? 'pill-verified' : 'pill-anomaly')}">${credibilityStatus}</span></td>
+                                <td class="price-text">₹${r[3]}</td>
+                                <td><span class="status-pill ${isDecom ? 'pill-anomaly' : (ao ? 'pill-verified' : 'pill-anomaly')}">${aiStatus}</span></td>
+                                <td><span class="${isCancelled || ht.includes('Unknown') ? 'handler-danger' : 'handler-text'}">${ht}</span></td>
+                                <td>${actionBtn}</td>
+                              </tr>`;
+                    });
+                    h += `</tbody></table></div>`;
+                    c.innerHTML += h;
+                }
+                gsap.from(".block-unit", {y: 30, opacity: 0, duration: 0.5, stagger: 0.1});
+            }
+            function slide(dir) {
+                let n = startIdx + dir;
+                if (n >= 0 && n <= blocks.length - 1) { startIdx = n; renderLedger(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            }
+            renderLedger();
+        </script>
+    </body>
+</html>
