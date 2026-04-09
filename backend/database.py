@@ -1,15 +1,20 @@
+import os
 import psycopg2
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def cn():
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        return psycopg2.connect(db_url)
     return psycopg2.connect(
-        host="127.0.0.1",
-        dbname="s_chain",
-        user="postgres",
-        password="India@#123",
-        port="5432",
+        host="127.0.0.1", 
+        dbname="s_chain", 
+        user="postgres", 
+        password="India@123", 
+        port="5432"
     )
-
 
 def it():
     c = cn()
@@ -31,7 +36,6 @@ def it():
     )
     c.commit()
     c.close()
-
 
 if __name__ == "__main__":
     it()
