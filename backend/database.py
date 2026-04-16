@@ -12,27 +12,26 @@ def cn():
         host="127.0.0.1", 
         dbname="s_chain", 
         user="postgres", 
-        password="India@123", 
-        port="5432"
+        password="2118", 
+        port="5757"
     )
 
 def it():
     c = cn()
     k = c.cursor()
-    k.execute("DROP TABLE IF EXISTS p;")
-    k.execute("DROP TABLE IF EXISTS users;")
-    k.execute("DROP TABLE IF EXISTS admins;")
+    # Safely create tables only if they don't exist. NO DROPPING.
     k.execute(
-        "CREATE TABLE p (id SERIAL PRIMARY KEY, n TEXT, b TEXT, pr TEXT, cat TEXT, s TEXT, h TEXT, hand TEXT, sell TEXT, cons TEXT);"
+        "CREATE TABLE IF NOT EXISTS p (id SERIAL PRIMARY KEY, n TEXT, b TEXT, pr TEXT, cat TEXT, s TEXT, h TEXT, hand TEXT, sell TEXT, cons TEXT);"
     )
     k.execute(
-        "CREATE TABLE users (id SERIAL PRIMARY KEY, uname TEXT UNIQUE, email TEXT UNIQUE, pwd TEXT, st TEXT);"
+        "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, uname TEXT UNIQUE, email TEXT UNIQUE, pwd TEXT, st TEXT);"
     )
     k.execute(
-        "CREATE TABLE admins (id SERIAL PRIMARY KEY, uname TEXT UNIQUE, email TEXT UNIQUE, pwd TEXT, role TEXT);"
+        "CREATE TABLE IF NOT EXISTS admins (id SERIAL PRIMARY KEY, uname TEXT UNIQUE, email TEXT UNIQUE, pwd TEXT, role TEXT);"
     )
+    # Insert master admin only if it doesn't already exist (prevents crash on duplicate)
     k.execute(
-        "INSERT INTO admins (uname, email, pwd, role) VALUES ('admin', 'master@sys.com', 'admin123', 'Master');"
+        "INSERT INTO admins (uname, email, pwd, role) VALUES ('admin', 'master@sys.com', 'admin123', 'Master') ON CONFLICT (uname) DO NOTHING;"
     )
     c.commit()
     c.close()
