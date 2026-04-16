@@ -19,7 +19,6 @@ def cn():
 def it():
     c = cn()
     k = c.cursor()
-    # Safely create tables only if they don't exist. NO DROPPING.
     k.execute(
         "CREATE TABLE IF NOT EXISTS p (id SERIAL PRIMARY KEY, n TEXT, b TEXT, pr TEXT, cat TEXT, s TEXT, h TEXT, hand TEXT, sell TEXT, cons TEXT);"
     )
@@ -29,7 +28,6 @@ def it():
     k.execute(
         "CREATE TABLE IF NOT EXISTS admins (id SERIAL PRIMARY KEY, uname TEXT UNIQUE, email TEXT UNIQUE, pwd TEXT, role TEXT);"
     )
-    # Insert master admin only if it doesn't already exist (prevents crash on duplicate)
     k.execute(
         "INSERT INTO admins (uname, email, pwd, role) VALUES ('admin', 'master@sys.com', 'admin123', 'Master') ON CONFLICT (uname) DO NOTHING;"
     )
