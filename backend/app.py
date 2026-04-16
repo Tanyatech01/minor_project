@@ -35,9 +35,9 @@ def cn():
     return psycopg2.connect(du)
 
 d = os.path.dirname(__file__)
-md = pickle.load(open(os.path.join(d, "model.pkl"), "rb"))
-lb = pickle.load(open(os.path.join(d, "le_b.pkl"), "rb"))
-lc = pickle.load(open(os.path.join(d, "le_c.pkl"), "rb"))
+# md = pickle.load(open(os.path.join(d, "model.pkl"), "rb"))
+# lb = pickle.load(open(os.path.join(d, "le_b.pkl"), "rb"))
+# lc = pickle.load(open(os.path.join(d, "le_c.pkl"), "rb"))
 
 @fl.route("/")
 def hm():
